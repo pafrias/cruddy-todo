@@ -1,31 +1,61 @@
+
 const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
-const counter = require('./counter');
+const Database = require('./counter');
 
-var items = {};
+// var items = {};
 
-// Public API - Fix these CRUD functions ///////////////////////////////////////
 
+// Public API 
+
+// fixed
 exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  callback(null, { id, text });
-};
-
-exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
+  Database.getNextUniqueId((err, counterString) => {
+    var id = counterString;
+    var destination = exports.dataDir + '/' + id;
+    var ToDo = {id, text};
+    var string = JSON.stringify(ToDo);
+    //items[id] = text;
+    fs.appendFile(`${destination}`, string, (err) => {
+      if (err) {
+        throw err;
+      }
+      callback(null, { id, text });
+    });
   });
-  callback(null, data);
 };
 
+// needs to fs.read all text files in data
+exports.readAll = (callback) => {
+  fs.readdir(exports.dataDir, (err, files) => {
+
+    if (err) { throw ("Couldn't read ToDos"); }
+
+    let data = [];
+
+    for (var file of files) {
+      var obj = {
+        id: file,
+        text: file
+      };
+      data.push(obj);
+    }
+
+    callback(null, data);
+
+  });
+  // fs.readFile(`${exports.dataDir}/${file}`, (err, fileData) => {
+  // if (err) throw ('cannot read file');
+};
+
+// needs to fs.read
 exports.readOne = (id, callback) => {
   var text = items[id];
   if (!text) {
     callback(new Error(`No item with id: ${id}`));
   } else {
-    callback(null, { id, text });
+    callback(null, { id, text }); // why null?
   }
 };
 
@@ -35,7 +65,7 @@ exports.update = (id, text, callback) => {
     callback(new Error(`No item with id: ${id}`));
   } else {
     items[id] = text;
-    callback(null, { id, text });
+    callback(null, { id, text }); // why null?
   }
 };
 

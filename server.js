@@ -1,19 +1,20 @@
 
 // Todo Model //////////////////////////////////////////////////////////////////
 
-const Todo = require('./datastore');
+const Todo = require('./datastore'); // only brings in index?
 
 // Configure Express ///////////////////////////////////////////////////////////
 
-const bodyParser = require('body-parser');
-const express = require('express');
-const morgan = require('morgan');
-const path = require('path');
+const bodyParser = require('body-parser'); //? is run on all inputs to make them usable objects ?
+const express = require('express'); // lets us create the express - server
+const morgan = require('morgan'); // prints diagnostic console logs
+const path = require('path'); // ? helps us get at dat path ?
 
-const app = express();
+const app = express(); //fix?
+
 app.use(morgan('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: false})); // do we want to do this to everything?
 app.use(express.static(path.join(__dirname, './public')));
 
 // RESTful Routes for CRUD operations //////////////////////////////////////////

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
 
-var counter = 0;
+var counter;
 
 // Private helper functions ////////////////////////////////////////////////////
 
@@ -18,8 +18,10 @@ const zeroPaddedNumber = (num) => {
 const readCounter = (callback) => {
   fs.readFile(exports.counterFile, (err, fileData) => {
     if (err) {
+      // console.log("couldn't find file to read");
       callback(null, 0);
     } else {
+      // console.log('found file to read');
       callback(null, Number(fileData));
     }
   });
@@ -38,12 +40,22 @@ const writeCounter = (count, callback) => {
 
 // Public API - Fix this function //////////////////////////////////////////////
 
-exports.getNextUniqueId = () => {
-  counter = counter + 1;
-  return zeroPaddedNumber(counter);
+exports.getNextUniqueId = (callback) => {
+  
+  readCounter((err, counterNumber) => {
+    var newCount = counterNumber + 1;
+    writeCounter(newCount, (err, counterString) => {
+      callback(null, counterString);
+    });
+  });
+
 };
 
-
+/*
+  1) Could change readCounter to search through data files for highest counter 
+     number in case of failure
+  2) Could change readCounter to default to 0 if data is empty
+*/
 
 // Configuration -- DO NOT MODIFY //////////////////////////////////////////////
 
