@@ -1,108 +1,99 @@
-
 const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const Database = require('./counter');
 
-// var items = {};
 
 
 // Public API 
 
-// fixed
 exports.create = (text, callback) => {
   Database.getNextUniqueId((err, counterString) => {
     var id = counterString;
-    var destination = exports.dataDir + '/' + id;
-    var ToDo = {id, text};
-    var string = JSON.stringify(ToDo);
-    //items[id] = text;
-    fs.appendFile(`${destination}`, string, (err) => { //just put in destination by itself?
+    var destination = exports.dataDir + '/' + id + '.txt';
+    fs.appendFile(destination, text, (err) => { //just put in destination by itself?
       if (err) {
-        throw err;
+        callback(err);
+      } else {
+        var ToDo = { id, text };
+        callback(null, ToDo);
       }
-      callback(null, { id, text });
     });
   });
 };
 
-// needs to fs.read all text files in data
 exports.readAll = (callback) => {
   fs.readdir(exports.dataDir, (err, files) => {
 
-    if (err) { throw (`Couldn't read ToDos`); }
+    if (err) {
+      callback(err);
+    } else {
 
-    let data = [];
+      let data = [];
 
-    for (var file of files) {
-      var ToDo = {
-        id: file,
-        text: file
-      };
-      data.push(ToDo);
+      for (var file of files) {
+        var ToDo = {
+          id: file.slice(0, file.length - 4),
+          text: file.slice(0, file.length - 4)
+        };
+        data.push(ToDo);
+      }
+
+      callback(null, data);
     }
-
-    callback(null, data);
-
   });
   //// Will help later on for Buffer statements
   // fs.readFile(`${exports.dataDir}/${file}`, (err, fileData) => {
   // if (err) throw ('cannot read file');
 };
 
-// needs to fs.read
 exports.readOne = (id, callback) => {
 
-  /*var destination = exports.dataDir + '/' + id;
-    fs.readFile(destination, {}, (err, data) => {
+  var destination = exports.dataDir + '/' + id + '.txt';
+  fs.readFile(destination, 'utf8', (err, data) => {
+    if (err) {
+      callback(err);
+    } else {
       var ToDo = {
-        id: file,
-        text: file
+        id: id,
+        text: data
       };
-      data = Buffer.concat(data).toString();
-   })*/
-  var ToDo = {
-    id: id,
-    text: id
-  };
-
-  callback(null, ToDo);
-
-  /*
-    1) concatenate a string that points to the target message
-    2) read that file
-    --> create a ToDo object
-    --> call callback with null and ToDo
-
-
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text }); // why null?
-  }
-  */
+      callback(null, ToDo);
+    }
+  });
 };
 
+// very similar to create, however, can't use append bc we want to 
+// completely overwrite the data
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text }); // why null?
-  }
+
+  var destination = exports.dataDir + '/' + id + '.txt';
+  fs.readFile(destination, (err, data) => {
+    if (err) {
+      callback(err); 
+    } else {
+      var ToDo = { id, text };
+      fs.writeFile(destination, text, (err) => {
+        if (err) { throw ('error while updating file'); }
+        callback(null, ToDo);
+      });
+    }
+  });
 };
 
-exports.delete = (id, callback) => {
-  var item = items[id];
-  delete items[id];
-  if (!item) {
-    // report an error if item not found
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback();
-  }
+exports.delete = (id, callback) => { 
+
+  let destination = exports.dataDir + '/' + id + '.txt';
+  fs.readFile(destination, (err) => {
+    if (err) {
+      callback(err);
+    } else {
+      fs.unlink(destination, (err) => {
+        if (err) { callback(err); }
+        callback();
+      });
+    }
+  });
 };
 
 // Config+Initialization code -- DO NOT MODIFY /////////////////////////////////
