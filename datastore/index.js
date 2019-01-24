@@ -17,7 +17,7 @@ exports.create = (text, callback) => {
     var ToDo = {id, text};
     var string = JSON.stringify(ToDo);
     //items[id] = text;
-    fs.appendFile(`${destination}`, string, (err) => {
+    fs.appendFile(`${destination}`, string, (err) => { //just put in destination by itself?
       if (err) {
         throw err;
       }
@@ -30,33 +30,58 @@ exports.create = (text, callback) => {
 exports.readAll = (callback) => {
   fs.readdir(exports.dataDir, (err, files) => {
 
-    if (err) { throw ("Couldn't read ToDos"); }
+    if (err) { throw (`Couldn't read ToDos`); }
 
     let data = [];
 
     for (var file of files) {
-      var obj = {
+      var ToDo = {
         id: file,
         text: file
       };
-      data.push(obj);
+      data.push(ToDo);
     }
 
     callback(null, data);
 
   });
+  //// Will help later on for Buffer statements
   // fs.readFile(`${exports.dataDir}/${file}`, (err, fileData) => {
   // if (err) throw ('cannot read file');
 };
 
 // needs to fs.read
 exports.readOne = (id, callback) => {
+
+  /*var destination = exports.dataDir + '/' + id;
+    fs.readFile(destination, {}, (err, data) => {
+      var ToDo = {
+        id: file,
+        text: file
+      };
+      data = Buffer.concat(data).toString();
+   })*/
+  var ToDo = {
+    id: id,
+    text: id
+  };
+
+  callback(null, ToDo);
+
+  /*
+    1) concatenate a string that points to the target message
+    2) read that file
+    --> create a ToDo object
+    --> call callback with null and ToDo
+
+
   var text = items[id];
   if (!text) {
     callback(new Error(`No item with id: ${id}`));
   } else {
     callback(null, { id, text }); // why null?
   }
+  */
 };
 
 exports.update = (id, text, callback) => {
