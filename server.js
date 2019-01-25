@@ -32,6 +32,13 @@ app.post('/todo', (req, res) => {
 
 // Read all (cRud) -- collection route
 app.get('/todo', (req, res) => {
+  // Todo.readAll().then(todos => {
+  //   res.status(200).json(todos);
+  // }).catch(err => {
+  //   res.sendStatus(400);
+  // });
+  
+
   Todo.readAll((err, todos) => {
     if (err) {
       res.sendStatus(400);

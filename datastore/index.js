@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('underscore');
 const Database = require('./counter');
-
-
+const Promise = require('bluebird');
+Promise.promisifyAll(fs);
 
 // Public API 
 
@@ -23,6 +23,24 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
+
+  return fs.readdirAsync(exports.dataDir)
+    .then(files => {
+      var data = files.map(file => {
+        return ro(file.slice(0, file.length - 4));
+      })
+    return Promise.all(data);
+  })
+    .then(todos => {
+      callback(null, todos);
+    })
+    .catch(err => {
+      callback(err);
+    })
+
+
+
+  /*
   fs.readdir(exports.dataDir, (err, files) => {
 
     if (err) {
@@ -42,6 +60,7 @@ exports.readAll = (callback) => {
       callback(null, data);
     }
   });
+  */
   //// Will help later on for Buffer statements
   // fs.readFile(`${exports.dataDir}/${file}`, (err, fileData) => {
   // if (err) throw ('cannot read file');
@@ -105,3 +124,5 @@ exports.initialize = () => {
     fs.mkdirSync(exports.dataDir);
   }
 };
+
+var ro = Promise.promisify(exports.readOne);
